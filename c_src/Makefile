@@ -1,10 +1,11 @@
 CC=gcc
-CFLAGS=-std=c11 -Wall -Wextra
+SIM_PARAMS=-D L=48
+CFLAGS=-std=c11 -Wall -Wextra $(SIM_PARAMS)
 LDFLAGS=-lm
 GL_LDFLAGS=-lGL -lglfw
 
 # Files
-TARGETS=tiny_ising demo
+TARGETS=tiny_ising
 
 # Rules
 all: $(TARGETS)
