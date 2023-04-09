@@ -8,7 +8,7 @@
  *
  * Debugging: Ezequiel Ferrero
  */
-
+//15107497
 #include "ising.h"
 #include "params.h"
 #include "wtime.h"
