@@ -5,11 +5,11 @@
 #endif
 
 #ifndef TEMP_INITIAL
-#define TEMP_INITIAL 1.5 // initial temperature
+#define TEMP_INITIAL 0.0 // initial temperature
 #endif
 
 #ifndef TEMP_FINAL
-#define TEMP_FINAL 3.0 // final temperature
+#define TEMP_FINAL 5.0 // final temperature
 #endif
 
 #ifndef TEMP_DELTA

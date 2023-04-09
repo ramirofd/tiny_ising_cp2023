@@ -13,13 +13,12 @@ FILE=$RESULTS_DIR"size_comparison.csv"
 
 # Defaults 
 max=1024
-reps=5
+reps=1
 
 # Parse command line arguments
 while getopts "m:r:" opt; do
   case $opt in
     m)
-      echo "got max"
       max="$OPTARG"
       ;;
     r)
@@ -34,11 +33,11 @@ done
 
 echo "This script will build and run tiny_ising with different L values to measure time."
 echo "L,time" >> $FILE
-for ((i=640; i<=$max; i+=32))
+for ((i=32; i<=$max; i+=32))
 do
     echo "Building and running Ising for L=$i"
     make -s -C $SOURCE_DIR clean
-    make -s -C $SOURCE_DIR "SIM_PARAMS=-DL=$i -DTIME"
+    make -s -C $SOURCE_DIR "SIM_PARAMS=-DL=$i -DMETRIC"
     for ((j=1; j<=$reps; j++))
     do
         $SOURCE_DIR/tiny_ising >> $FILE

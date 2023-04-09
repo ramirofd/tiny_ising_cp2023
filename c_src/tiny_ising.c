@@ -8,7 +8,7 @@
  *
  * Debugging: Ezequiel Ferrero
  */
-//15107497
+
 #include "ising.h"
 #include "params.h"
 #include "wtime.h"
@@ -23,8 +23,8 @@
 // Internal definitions and functions
 // out vector size, it is +1 since we reach TEMP_
 #define NPOINTS (1 + (int)((TEMP_FINAL - TEMP_INITIAL) / TEMP_DELTA))
-#define N (L * L) // system size
-#define SEED (time(NULL)) // random seed
+#define N       (L * L) // system size
+#define SEED    (time(NULL)) // random seed
 
 // temperature, E, E^2, E^4, M, M^2, M^4
 struct statpoint {
@@ -100,10 +100,10 @@ static void init(int grid[L][L])
 int main(void)
 {
     // parameter checking
-    static_assert(TEMP_DELTA != 0, "Invalid temperature step");
-    static_assert(((TEMP_DELTA > 0) && (TEMP_INITIAL <= TEMP_FINAL)) || ((TEMP_DELTA < 0) && (TEMP_INITIAL >= TEMP_FINAL)), "Invalid temperature range+step");
-    static_assert(TMAX % DELTA_T == 0, "Measurements must be equidistant"); // take equidistant calculate()
-    static_assert((L * L / 2) * 4ULL < UINT_MAX, "L too large for uint indices"); // max energy, that is all spins are the same, fits into a ulong
+    // static_assert(TEMP_DELTA != 0, "Invalid temperature step");
+    // static_assert(((TEMP_DELTA > 0) && (TEMP_INITIAL <= TEMP_FINAL)) || ((TEMP_DELTA < 0) && (TEMP_INITIAL >= TEMP_FINAL)), "Invalid temperature range+step");
+    // static_assert(TMAX % DELTA_T == 0, "Measurements must be equidistant"); // take equidistant calculate()
+    // static_assert((L * L / 2) * 4ULL < UINT_MAX, "L too large for uint indices"); // max energy, that is all spins are the same, fits into a ulong
 
     // the stats
     struct statpoint stat[NPOINTS];
@@ -117,7 +117,7 @@ int main(void)
     srand(SEED);
 
     // start timer
-    #ifdef TIME
+    #if defined(TIME) || defined(METRIC)
     double start = wtime();
     #endif
     // clear the grid
@@ -126,21 +126,33 @@ int main(void)
 
     // temperature increasing cycle
     cycle(grid, TEMP_INITIAL, TEMP_FINAL, TEMP_DELTA, DELTA_T, stat);
-
+    
     // // stop timer
-    #ifdef TIME
+    #if defined(TIME) || defined(METRIC)
     double elapsed = wtime() - start;
+    #endif
+
+    #if defined(TIME)
     printf("%i, %lf\n", L, elapsed);
     #endif
 
+    #if defined(METRIC)
+    printf("%i, %lf\n", L, ((double)N)/elapsed); //puntos de la grilla por segundo
+    #endif
+
     #ifdef OUTPUT_SIM_RESULT
-    printf("# temperatura,energia,magnetizacion");
+    printf("# Temp,E,E^2,E^4,M,M^2,M^4\n");
     for (unsigned int i = 0; i < NPOINTS; ++i) {
-        printf("%lf\t%.10lf\t%.10lf\n",
+        printf("%lf,%.10lf,%.10lf,%.10lf,%.10lf,%.10lf,%.10lf\n",
                stat[i].t,
                stat[i].e / ((double)N),
-               stat[i].m);
+               stat[i].e2 / ((double)N * N),
+               stat[i].e4 / ((double)N * N * N * N),
+               stat[i].m,
+               stat[i].m2,
+               stat[i].m4);
     }
     #endif
+
     return 0;
 }

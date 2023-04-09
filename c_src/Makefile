@@ -1,6 +1,6 @@
 CC=gcc
-SIM_PARAMS=-D L=48
-CFLAGS=-std=c11 -Wall -Wextra $(SIM_PARAMS)
+SIM_PARAMS=-DL=512 -DMETRIC
+CFLAGS=-std=c11 -Wall -Wextra $(OPTIM_FLAGS) $(SIM_PARAMS)
 LDFLAGS=-lm
 GL_LDFLAGS=-lGL -lglfw
 
