@@ -1,4 +1,4 @@
-compiler, flags, L, metric
+compiler,flags,L,metric
 clang, -O3, 512, 5169.795281
 clang, -O3 -march=native, 512, 5326.609035
 gcc, -O3, 512, 5221.126984

@@ -1,4 +1,4 @@
-compiler, flags, L, metric
+compiler,flags,L,metric
 clang, -O0, 512, 3353.574824
 clang, -O1, 512, 5158.060750
 clang, -O2, 512, 5293.713045

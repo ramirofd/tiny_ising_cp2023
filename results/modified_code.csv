@@ -1,4 +1,4 @@
-host, code, compiler, flags, L, metric
+host,code,compiler,flags,L,metric
 local, original, clang, none, 512, 1815.168771
 local, original, clang, -O2 -march=native, 512, 3158.846956
 local, modified, clang, -O2 -march=native, 512, 3670.717698
