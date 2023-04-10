@@ -1,0 +1,7 @@
+host, code, compiler, flags, L, metric
+local, original, clang, -O2, 512, 3134.789433
+local, modified, clang, -O2 -march=native, 512, 3670.717698
+atom, original, clang, -O2 -march=native, 512, 5321.571263
+atom, modified, clang, -O2 -march=native, 512, 6762.512531
+zx81, original, clang, -O2 -march=native, 512, 2983.894675
+zx81, modified, clang, -O2 -march=native, 512, 3539.855305

@@ -22,9 +22,6 @@ make -s -C $SOURCE_DIR clean; make -s -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$
 flags="-O3 -march=native"
 make -s -C $SOURCE_DIR clean; make -s -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$flags"; echo "$compiler, $flags, "$($SOURCE_DIR/tiny_ising) >> $FILE
 
-# flags="-O3 -march=native --floop-nest-optimize"
-# make -s -C $SOURCE_DIR clean; make -s -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$flags"; echo "$compiler, $flags, "$($SOURCE_DIR/tiny_ising) >> $FILE
-
 compiler="gcc"
 flags="-O3";
 make -s -C $SOURCE_DIR clean; make -s -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$flags"; echo "$compiler, $flags, "$($SOURCE_DIR/tiny_ising) >> $FILE

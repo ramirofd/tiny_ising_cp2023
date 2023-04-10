@@ -10,4 +10,4 @@ SOURCE_DIR=$PARENT_DIRECTORY/c_src
 
 compiler=clang
 flags="-O3 -march=native"
-make -C $SOURCE_DIR clean; make -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$flags"; echo "$compiler, $flags, "$($SOURCE_DIR/tiny_ising)
+make clean; make CC=clang OPTIM_FLAGS="-O2"; echo "clang, -O2, "$(./tiny_ising)
