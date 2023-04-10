@@ -1,4 +1,5 @@
 #include "ising.h"
+#include "random.h"
 
 #include <math.h>
 #include <stdlib.h>
