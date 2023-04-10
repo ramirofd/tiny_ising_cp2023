@@ -1,5 +1,4 @@
 #include "ising.h"
-#include "random.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -18,10 +17,10 @@ void update(const float temp, int grid[L][L])
             int spin_neigh_e = grid[i][(j + 1) % L];
             int spin_neigh_w = grid[i][(j + L - 1) % L];
             int spin_neigh_s = grid[(i + 1) % L][j];
-            int h_before = -(spin_old * spin_neigh_n) - (spin_old * spin_neigh_e) - (spin_old * spin_neigh_w) - (spin_old * spin_neigh_s);
+            int h_before = -1 * spin_old * ( spin_neigh_n + spin_neigh_e + spin_neigh_w + spin_neigh_s);
 
             // h after taking new spin
-            int h_after = -(spin_new * spin_neigh_n) - (spin_new * spin_neigh_e) - (spin_new * spin_neigh_w) - (spin_new * spin_neigh_s);
+            int h_after = -1 * spin_new * ( spin_neigh_n + spin_neigh_e + spin_neigh_w + spin_neigh_s);
 
             int delta_E = h_after - h_before;
             float p = rand() / (float)RAND_MAX;
