@@ -1,7 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-base=2
-power=5
-# pow=$(($base**$power))
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PARENT_DIRECTORY="${SCRIPT_DIR%/*}"
 
-echo "$((2 ** $power))"
+RESULTS_DIR=$PARENT_DIRECTORY/results/
+mkdir -p $RESULTS_DIR
+
+SOURCE_DIR=$PARENT_DIRECTORY/c_src
+
+compiler=clang
+flags="-O3 -march=native"
+make -C $SOURCE_DIR clean; make -C $SOURCE_DIR CC=$compiler OPTIM_FLAGS="$flags"; echo "$compiler, $flags, "$($SOURCE_DIR/tiny_ising)
