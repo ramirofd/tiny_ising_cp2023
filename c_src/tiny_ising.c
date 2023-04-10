@@ -141,7 +141,7 @@ int main(void)
     #endif
 
     #ifdef OUTPUT_SIM_RESULT
-    printf("# Temp,E,E^2,E^4,M,M^2,M^4\n");
+    printf("Temp,E,E^2,E^4,M,M^2,M^4\n");
     for (unsigned int i = 0; i < NPOINTS; ++i) {
         printf("%lf,%.10lf,%.10lf,%.10lf,%.10lf,%.10lf,%.10lf\n",
                stat[i].t,
