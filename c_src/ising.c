@@ -2,9 +2,38 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <limits.h>
+
+// #define SEED 12345
+
+uint64_t state[2] = {0xdeadbeef, 0xcafebabe};
+
+void xorshift128plus() {
+    uint64_t s1 = state[0];
+    const uint64_t s0 = state[1];
+    state[0] = s0;
+    s1 ^= s1 << 23;
+    state[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+}
+
+unsigned int LCG(unsigned int seed) {
+    static const unsigned int a = 1664525;
+    static const unsigned int c = 1013904223;
+    static unsigned int prev = 0;
+
+    if (seed != 0) {
+        prev = seed;
+    }
+
+    prev = (a * prev + c) % RAND_MAX;
+    return prev;
+}
 
 void update(const float temp, int grid[L][L])
 {
+    // int seed = SEED;
     // typewriter update
     float expfs[2] = {expf(-(4/temp)), expf(-(8/temp))};
     for (unsigned int i = 0; i < L; ++i) {
@@ -23,7 +52,14 @@ void update(const float temp, int grid[L][L])
             int h_after = -spin_new * spin_neighbours;
             
             int delta_E = h_after - h_before;
-            float p = rand() / (float)RAND_MAX;
+
+            // seed = LCG(seed);
+            // float p = seed / (float)RAND_MAX;
+            
+            // float p = rand() / (float)RAND_MAX;
+            xorshift128plus();
+            int rand = state[1]%RAND_MAX;
+            float p = rand / (float)RAND_MAX;
             if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
                 grid[i][j] = spin_new;
             }
