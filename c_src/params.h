@@ -17,7 +17,7 @@
 #endif
 
 #ifndef TRAN
-#define TRAN 5 // equilibration time
+#define TRAN 20 // equilibration time
 #endif
 
 #ifndef TMAX
@@ -29,7 +29,7 @@
 #endif
 
 #ifndef WIDTH
-#define WIDTH (L)
+#define WIDTH (L/2)
 #endif
 
 #ifndef HEIGHT

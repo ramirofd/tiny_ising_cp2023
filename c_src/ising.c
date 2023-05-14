@@ -14,19 +14,21 @@ uint64_t xorshift128plus() {
 }
 
 
-void update(const float temp, int grid[L][L])
+void update_rb(color col, const float temp, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH])
 {
     float expfs[2] = {expf(-(4/temp)), expf(-(8/temp))};
-    for (unsigned int i = 0; i < HEIGHT; ++i) {
+    int side_shift = col == RED ? -1 : 1;
+
+    for (unsigned int i = 0; i < HEIGHT; ++i, side_shift = -side_shift) {
         for (unsigned int j = 0; j < WIDTH; ++j) {
-            int spin_old = grid[i][j];
+            int spin_old = write[i][j];
             int spin_new = (-1) * spin_old;
 
             // computing h_before
-            int spin_neigh_n = grid[(i + 1) % L][j];
-            int spin_neigh_e = grid[i][(j + 1) % L];
-            int spin_neigh_w = grid[i][(j + L - 1) % L];
-            int spin_neigh_s = grid[(i + L - 1) % L][j];
+            int spin_neigh_n = read[i][(j - 1 + HEIGHT) % HEIGHT];
+            int spin_neigh_e = read[i][j];
+            int spin_neigh_w = read[(i + side_shift + WIDTH) % WIDTH][j];
+            int spin_neigh_s = read[i][(j + 1) % HEIGHT];
             int h_before = -spin_old * (spin_neigh_e+spin_neigh_n+spin_neigh_s+spin_neigh_w);
 
             // h after taking new spin
@@ -37,7 +39,7 @@ void update(const float temp, int grid[L][L])
             int rand = xorshift128plus()%RAND_MAX;
             float p = rand / (float)RAND_MAX;
             if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
-                grid[i][j] = spin_new;
+                write[i][j] = spin_new;
             }
         }
     }
@@ -45,20 +47,38 @@ void update(const float temp, int grid[L][L])
 
 
 
-double calculate(int grid[L][L], int* M_max)
+int calculate_rb(color col, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH], int* M_max)
 {
     int E = 0;
-    for (unsigned int i = 0; i < L; ++i) {
-        for (unsigned int j = 0; j < L; ++j) {
-            int spin = grid[i][j];
-            int spin_neigh_n = grid[(i + 1) % L][j];
-            int spin_neigh_e = grid[i][(j + 1) % L];
-            int spin_neigh_w = grid[i][(j + L - 1) % L];
-            int spin_neigh_s = grid[(i + L - 1) % L][j];
+    int side_shift = col == RED ? -1 : 1;
+    for (unsigned int i = 0; i < HEIGHT; ++i, side_shift = -side_shift) {
+        for (unsigned int j = 0; j < WIDTH; ++j) {
+            int spin = write[i][j];
+            int spin_neigh_n = read[i][(j - 1 + HEIGHT) % HEIGHT];
+            int spin_neigh_e = read[i][j];
+            int spin_neigh_w = read[(i + side_shift + WIDTH) % WIDTH][j];
+            int spin_neigh_s = read[i][(j + 1) % HEIGHT];
 
             E += (spin * spin_neigh_n) + (spin * spin_neigh_e) + (spin * spin_neigh_w) + (spin * spin_neigh_s);
             *M_max += spin;
         }
     }
-    return -((double)E / 2.0);
+    return E;
+}
+
+
+void update(const float temp, 
+            int grid_r[HEIGHT][WIDTH], 
+            int grid_b[HEIGHT][WIDTH]) {
+	update_rb(RED, temp, grid_b, grid_r);
+	update_rb(BLACK, temp, grid_r, grid_b);
+}
+
+double calculate(int grid_r[HEIGHT][WIDTH], 
+                 int grid_b[HEIGHT][WIDTH], 
+                 int* M_max) {
+	int E = 0;
+	E += calculate_rb(RED, grid_b, grid_r, M_max);
+	E += calculate_rb(BLACK, grid_r, grid_b, M_max);
+	return - (double) E / 2.0;
 }

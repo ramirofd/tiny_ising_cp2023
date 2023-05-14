@@ -37,7 +37,8 @@ struct statpoint {
 };
 
 
-static void cycle(int grid[L][L],
+static void cycle(int grid_r[HEIGHT][WIDTH],
+                  int grid_b[HEIGHT][WIDTH],
                   const double min, const double max,
                   const double step, const unsigned int calc_step,
                   struct statpoint stats[])
@@ -51,18 +52,18 @@ static void cycle(int grid[L][L],
 
         // equilibrium phase
         for (unsigned int j = 0; j < TRAN; ++j) {
-            update(temp, grid);
+            update(temp, grid_r, grid_b);
         }
 
         // measurement phase
         unsigned int measurements = 0;
         double e = 0.0, e2 = 0.0, e4 = 0.0, m = 0.0, m2 = 0.0, m4 = 0.0;
         for (unsigned int j = 0; j < TMAX; ++j) {
-            update(temp, grid);
+            update(temp, grid_r, grid_b);
             if (j % calc_step == 0) {
                 double energy = 0.0, mag = 0.0;
                 int M_max = 0;
-                energy = calculate(grid, &M_max);
+                energy = calculate(grid_r, grid_b, &M_max);
                 mag = abs(M_max) / (double)N;
                 e += energy;
                 e2 += energy * energy;
@@ -86,10 +87,10 @@ static void cycle(int grid[L][L],
 }
 
 
-static void init(int grid[L][L])
+static void init(int grid[HEIGHT][WIDTH])
 {
-    for (unsigned int i = 0; i < L; ++i) {
-        for (unsigned int j = 0; j < L; ++j) {
+    for (unsigned int i = 0; i < HEIGHT; ++i) {
+        for (unsigned int j = 0; j < WIDTH; ++j) {
             grid[i][j] = 1;
         }
     }
@@ -117,11 +118,14 @@ int main(void)
     double start = wtime();
     #endif
     // clear the grid
-    int grid[L][L] = { { 0 } };
-    init(grid);
+    // int grid[L][L] = { { 0 } };
+    int grid_r[HEIGHT][WIDTH] = { { 0 } };
+    int grid_b[HEIGHT][WIDTH] = { { 0 } };
+    init(grid_r);
+    init(grid_b);
 
     // temperature increasing cycle
-    cycle(grid, TEMP_INITIAL, TEMP_FINAL, TEMP_DELTA, DELTA_T, stat);
+    cycle(grid_r, grid_b, TEMP_INITIAL, TEMP_FINAL, TEMP_DELTA, DELTA_T, stat);
     
     // // stop timer
     #if defined(TIME) || defined(METRIC)
