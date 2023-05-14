@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.puml": "plantuml",
         "limits.h": "c",
         "params.h": "c",
         "wtime.h": "c",
@@ -7,6 +8,7 @@
         "math.h": "c",
         "stdio.h": "c",
         "stdlib.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "stdint.h": "c"
     }
 }

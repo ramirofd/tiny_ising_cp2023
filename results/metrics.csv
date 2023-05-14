@@ -1,0 +1,4 @@
+mejoras,grid,metric
+sin autovec,512,9718.9
+-O3 -march=native -ftree-vectorize,512,10322.189646
+-O3 -march=native -ftree-vectorize -ffast-math,512,11404.502630

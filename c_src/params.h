@@ -27,3 +27,11 @@
 #ifndef DELTA_T
 #define DELTA_T 5 // sampling period for energy and magnetization
 #endif
+
+#ifndef WIDTH
+#define WIDTH (L)
+#endif
+
+#ifndef HEIGHT
+#define HEIGHT (L)
+#endif

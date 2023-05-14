@@ -17,7 +17,6 @@
 #include <limits.h> // UINT_MAX
 #include <math.h> // expf()
 #include <stdio.h> // printf()
-#include <stdlib.h> // rand()
 #include <time.h> // time()
 
 // Internal definitions and functions
@@ -25,6 +24,8 @@
 #define NPOINTS (1 + (int)((TEMP_FINAL - TEMP_INITIAL) / TEMP_DELTA))
 #define N       (L * L) // system size
 #define SEED    (time(NULL)) // random seed
+
+typedef enum {RED, BLACK} color;
 
 // temperature, E, E^2, E^4, M, M^2, M^4
 struct statpoint {
@@ -38,7 +39,7 @@ struct statpoint {
 };
 
 
-static void cycle(int grid[L][L],
+static void cycle(int * grid,
                   const double min, const double max,
                   const double step, const unsigned int calc_step,
                   struct statpoint stats[])
@@ -87,11 +88,11 @@ static void cycle(int grid[L][L],
 }
 
 
-static void init(int grid[L][L])
+static void init(int * grid)
 {
-    for (unsigned int i = 0; i < L; ++i) {
-        for (unsigned int j = 0; j < L; ++j) {
-            grid[i][j] = 1;
+    for (unsigned int i = 0; i < HEIGHT; ++i) {
+        for (unsigned int j = 0; j < WIDTH; ++j) {
+            grid[IDX(j,i)] = 1;
         }
     }
 }
@@ -113,15 +114,13 @@ int main(void)
         stat[i].m = stat[i].m2 = stat[i].m4 = 0.0;
     }
 
-    // configure RNG
-    srand(SEED);
-
     // start timer
     #if defined(TIME) || defined(METRIC)
     double start = wtime();
     #endif
     // clear the grid
-    int grid[L][L] = { { 0 } };
+    // int grid[L][L] = { { 0 } };
+    int * grid = malloc (HEIGHT*WIDTH*sizeof(int));
     init(grid);
 
     // temperature increasing cycle
