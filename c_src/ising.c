@@ -13,23 +13,20 @@ uint64_t xorshift128plus() {
     return s[1];
 }
 
-size_t IDX(size_t x, size_t y) {
-	return y * WIDTH + x;
-}
 
-void update(const float temp, int * grid)
+void update(const float temp, int grid[L][L])
 {
     float expfs[2] = {expf(-(4/temp)), expf(-(8/temp))};
-    for (unsigned int i = 0; i < HEIGHT; ++i) { //filas
-        for (unsigned int j = 0; j < WIDTH; ++j) { //columnas
-            int spin_old = grid[IDX(j,i)];
+    for (unsigned int i = 0; i < HEIGHT; ++i) {
+        for (unsigned int j = 0; j < WIDTH; ++j) {
+            int spin_old = grid[i][j];
             int spin_new = (-1) * spin_old;
 
             // computing h_before
-            int spin_neigh_n = grid[IDX(j,(i + 1) % HEIGHT)];
-            int spin_neigh_e = grid[IDX((j + 1) % WIDTH, i)];
-            int spin_neigh_w = grid[IDX((j + L - 1) % WIDTH, i)];
-            int spin_neigh_s = grid[IDX(j, (i + L - 1) % HEIGHT)];
+            int spin_neigh_n = grid[(i + 1) % L][j];
+            int spin_neigh_e = grid[i][(j + 1) % L];
+            int spin_neigh_w = grid[i][(j + L - 1) % L];
+            int spin_neigh_s = grid[(i + L - 1) % L][j];
             int h_before = -spin_old * (spin_neigh_e+spin_neigh_n+spin_neigh_s+spin_neigh_w);
 
             // h after taking new spin
@@ -40,7 +37,7 @@ void update(const float temp, int * grid)
             int rand = xorshift128plus()%RAND_MAX;
             float p = rand / (float)RAND_MAX;
             if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
-                grid[IDX(j,i)] = spin_new;
+                grid[i][j] = spin_new;
             }
         }
     }
@@ -48,16 +45,16 @@ void update(const float temp, int * grid)
 
 
 
-double calculate(int * grid, int* M_max)
+double calculate(int grid[L][L], int* M_max)
 {
     int E = 0;
-    for (unsigned int i = 0; i < HEIGHT; ++i) {
-        for (unsigned int j = 0; j < WIDTH; ++j) {
-            int spin = grid[IDX(j,i)];
-            int spin_neigh_n = grid[IDX(j,(i + 1) % HEIGHT)];
-            int spin_neigh_e = grid[IDX((j + 1) % WIDTH, i)];
-            int spin_neigh_w = grid[IDX((j + L - 1) % WIDTH, i)];
-            int spin_neigh_s = grid[IDX(j, (i + L - 1) % HEIGHT)];
+    for (unsigned int i = 0; i < L; ++i) {
+        for (unsigned int j = 0; j < L; ++j) {
+            int spin = grid[i][j];
+            int spin_neigh_n = grid[(i + 1) % L][j];
+            int spin_neigh_e = grid[i][(j + 1) % L];
+            int spin_neigh_w = grid[i][(j + L - 1) % L];
+            int spin_neigh_s = grid[(i + L - 1) % L][j];
 
             E += (spin * spin_neigh_n) + (spin * spin_neigh_e) + (spin * spin_neigh_w) + (spin * spin_neigh_s);
             *M_max += spin;

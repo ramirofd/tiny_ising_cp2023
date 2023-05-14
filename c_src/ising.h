@@ -6,6 +6,5 @@
 #include <stdint.h>
 
 void xorshift128plus_init();
-size_t IDX(size_t y, size_t x);
-void update(const float temp, int * grid);
-double calculate(int * grid, int* M_max);
+void update(const float temp, int grid[L][L]);
+double calculate(int grid[L][L], int* M_max);

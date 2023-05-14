@@ -25,8 +25,6 @@
 #define N       (L * L) // system size
 #define SEED    (time(NULL)) // random seed
 
-typedef enum {RED, BLACK} color;
-
 // temperature, E, E^2, E^4, M, M^2, M^4
 struct statpoint {
     double t;
@@ -39,7 +37,7 @@ struct statpoint {
 };
 
 
-static void cycle(int * grid,
+static void cycle(int grid[L][L],
                   const double min, const double max,
                   const double step, const unsigned int calc_step,
                   struct statpoint stats[])
@@ -88,11 +86,11 @@ static void cycle(int * grid,
 }
 
 
-static void init(int * grid)
+static void init(int grid[L][L])
 {
-    for (unsigned int i = 0; i < HEIGHT; ++i) {
-        for (unsigned int j = 0; j < WIDTH; ++j) {
-            grid[IDX(j,i)] = 1;
+    for (unsigned int i = 0; i < L; ++i) {
+        for (unsigned int j = 0; j < L; ++j) {
+            grid[i][j] = 1;
         }
     }
 }
@@ -119,8 +117,7 @@ int main(void)
     double start = wtime();
     #endif
     // clear the grid
-    // int grid[L][L] = { { 0 } };
-    int * grid = malloc (HEIGHT*WIDTH*sizeof(int));
+    int grid[L][L] = { { 0 } };
     init(grid);
 
     // temperature increasing cycle
