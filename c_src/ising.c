@@ -13,33 +13,42 @@ uint64_t xorshift128plus() {
     return s[1];
 }
 
+size_t idx(size_t x, size_t y) {
+    return y * WIDTH + x;
+}
 
-void update_rb(color col, const float temp, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH])
+// void update_cell(const int *restrict read, int * restrict write, int i, int j, int neigh, float expfs[2]){
+            
+// }
+
+void update_rb(color col, const float temp, const int * restrict read, int * restrict write)
 {
     float expfs[2] = {expf(-(4/temp)), expf(-(8/temp))};
     int side_shift = col == RED ? -1 : 1;
 
-    for (unsigned int i = 0; i < HEIGHT; ++i, side_shift = -side_shift) {
-        for (unsigned int j = 0; j < WIDTH; ++j) {
-            int spin_old = write[i][j];
-            int spin_new = (-1) * spin_old;
+    for (unsigned int y = 1; y < HEIGHT-1; ++y, side_shift = -side_shift) {
+        for (unsigned int x = 1; x < WIDTH-1; ++x) {
+            int spin_old = write[idx(x, y)];
+			int spin_new = -spin_old;
 
-            // computing h_before
-            int spin_neigh_n = read[i][(j - 1 + HEIGHT) % HEIGHT];
-            int spin_neigh_e = read[i][j];
-            int spin_neigh_w = read[(i + side_shift + WIDTH) % WIDTH][j];
-            int spin_neigh_s = read[i][(j + 1) % HEIGHT];
-            int h_before = -spin_old * (spin_neigh_e+spin_neigh_n+spin_neigh_s+spin_neigh_w);
+			// computing h_before
+			int spin_neigh_up   = read[idx(x, (y - 1 + HEIGHT) % HEIGHT)];
+			int spin_neigh_same = read[idx(x, y)];
+			int spin_neigh_side = read[idx((x + side_shift + WIDTH), y)];
+			int spin_neigh_down = read[idx(x, (y + 1) % HEIGHT)];
 
-            // h after taking new spin
-            int h_after = -spin_new * (spin_neigh_e+spin_neigh_n+spin_neigh_s+spin_neigh_w);
-            
-            int delta_E = h_after - h_before;
-            
+			int h_before = - (spin_old*spin_neigh_up)   - (spin_old*spin_neigh_same)
+				   - (spin_old*spin_neigh_side) - (spin_old*spin_neigh_down);
+
+			// h after taking new spin
+			int h_after = - (spin_new*spin_neigh_up)   - (spin_new*spin_neigh_same)
+			              - (spin_new*spin_neigh_side) - (spin_new*spin_neigh_down);
+
+			int delta_E = h_after - h_before;
             int rand = xorshift128plus()%RAND_MAX;
             float p = rand / (float)RAND_MAX;
             if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
-                write[i][j] = spin_new;
+                write[idx(x,y)] = spin_new;
             }
         }
     }
@@ -47,17 +56,17 @@ void update_rb(color col, const float temp, int read[HEIGHT][WIDTH], int write[H
 
 
 
-int calculate_rb(color col, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH], int* M_max)
+int calculate_rb(color col, const int * restrict read, const int * restrict write, int * restrict M_max)
 {
     int E = 0;
     int side_shift = col == RED ? -1 : 1;
-    for (unsigned int i = 0; i < HEIGHT; ++i, side_shift = -side_shift) {
-        for (unsigned int j = 0; j < WIDTH; ++j) {
-            int spin = write[i][j];
-            int spin_neigh_n = read[i][(j - 1 + HEIGHT) % HEIGHT];
-            int spin_neigh_e = read[i][j];
-            int spin_neigh_w = read[(i + side_shift + WIDTH) % WIDTH][j];
-            int spin_neigh_s = read[i][(j + 1) % HEIGHT];
+    for (unsigned int y = 0; y < HEIGHT; ++y, side_shift = -side_shift) {
+        for (unsigned int x = 0; x < WIDTH; ++x) {
+            int spin = write[idx(x,y)];
+            int spin_neigh_n = read[idx(x,(y - 1 + HEIGHT) % HEIGHT)];
+            int spin_neigh_e = read[idx(x,y)];
+            int spin_neigh_w = read[idx((x + side_shift + WIDTH) % WIDTH,y)];
+            int spin_neigh_s = read[idx(x,(y + 1) % HEIGHT)];
 
             E += (spin * spin_neigh_n) + (spin * spin_neigh_e) + (spin * spin_neigh_w) + (spin * spin_neigh_s);
             *M_max += spin;
@@ -67,16 +76,13 @@ int calculate_rb(color col, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH], i
 }
 
 
-void update(const float temp, 
-            int grid_r[HEIGHT][WIDTH], 
-            int grid_b[HEIGHT][WIDTH]) {
+void update(const float temp, int * restrict grid_r, int * restrict grid_b) 
+{
 	update_rb(RED, temp, grid_b, grid_r);
 	update_rb(BLACK, temp, grid_r, grid_b);
 }
 
-double calculate(int grid_r[HEIGHT][WIDTH], 
-                 int grid_b[HEIGHT][WIDTH], 
-                 int* M_max) {
+double calculate(int * restrict grid_r, int * restrict grid_b, int * restrict M_max) {
 	int E = 0;
 	E += calculate_rb(RED, grid_b, grid_r, M_max);
 	E += calculate_rb(BLACK, grid_r, grid_b, M_max);

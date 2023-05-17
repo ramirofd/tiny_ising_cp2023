@@ -37,8 +37,8 @@ struct statpoint {
 };
 
 
-static void cycle(int grid_r[HEIGHT][WIDTH],
-                  int grid_b[HEIGHT][WIDTH],
+static void cycle(int * restrict grid_r,
+                  int * restrict grid_b,
                   const double min, const double max,
                   const double step, const unsigned int calc_step,
                   struct statpoint stats[])
@@ -87,11 +87,12 @@ static void cycle(int grid_r[HEIGHT][WIDTH],
 }
 
 
-static void init(int grid[HEIGHT][WIDTH])
+static void init(int * restrict grid_r, int * restrict grid_b)
 {
-    for (unsigned int i = 0; i < HEIGHT; ++i) {
-        for (unsigned int j = 0; j < WIDTH; ++j) {
-            grid[i][j] = 1;
+    for (unsigned int y = 0; y < HEIGHT; ++y) {
+        for (unsigned int x = 0; x < WIDTH; ++x) {
+            grid_r[idx(x,y)] = 1;
+            grid_b[idx(x,y)] = 1;
         }
     }
 }
@@ -119,10 +120,10 @@ int main(void)
     #endif
     // clear the grid
     // int grid[L][L] = { { 0 } };
-    int grid_r[HEIGHT][WIDTH] = { { 0 } };
-    int grid_b[HEIGHT][WIDTH] = { { 0 } };
-    init(grid_r);
-    init(grid_b);
+    size_t size = HEIGHT * WIDTH * sizeof(int);
+    int * grid_r = malloc(size);
+    int * grid_b = malloc(size);
+    init(grid_r, grid_b);
 
     // temperature increasing cycle
     cycle(grid_r, grid_b, TEMP_INITIAL, TEMP_FINAL, TEMP_DELTA, DELTA_T, stat);

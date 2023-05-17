@@ -1,7 +1,7 @@
 CC=gcc
 SIM_PARAMS=-DL=512 -DMETRIC
 # SIM_PARAMS=-DL=512 -DOUTPUT_SIM_RESULT
-OPTIM_FLAGS=-O3 -march=native -ffast-math -ftree-vectorize -fopt-info-vec
+OPTIM_FLAGS=-O2 -march=native -ffast-math -ftree-vectorize -fopt-info-vec -fopt-info-missed-vec -fno-strict-aliasing -finline-functions
 CFLAGS=-std=c11 -Wall -Wextra $(OPTIM_FLAGS) $(SIM_PARAMS)
 LDFLAGS=-lm
 GL_LDFLAGS=-lGL -lglfw

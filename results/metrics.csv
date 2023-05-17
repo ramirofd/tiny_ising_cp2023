@@ -1,4 +1,7 @@
 mejoras,grid,metric
+original,512,1815.3
 sin autovec,512,9718.9
 -O3 -march=native -ftree-vectorize,512,10322.189646
 -O3 -march=native -ftree-vectorize -ffast-math,512,11404.502630
+red-black con bordes,512,11236.955800
+red-black sin bordes,512,14568.368799

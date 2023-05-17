@@ -17,7 +17,7 @@
 #endif
 
 #ifndef TRAN
-#define TRAN 20 // equilibration time
+#define TRAN 5 // equilibration time
 #endif
 
 #ifndef TMAX

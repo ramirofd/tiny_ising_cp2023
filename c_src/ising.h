@@ -8,7 +8,8 @@
 typedef enum {RED, BLACK} color;
 
 void xorshift128plus_init();
-void update_rb(color col, const float temp, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH]);
-int calculate_rb(color col, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH], int* M_max);
-void update(const float temp, int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH]);
-double calculate(int read[HEIGHT][WIDTH], int write[HEIGHT][WIDTH], int* M_max);
+size_t idx(size_t i, size_t j);
+void update_rb(color col, const float temp, const int * restrict read, int * restrict write);
+int calculate_rb(color col, const int * restrict read, const int * restrict write, int * restrict M_max);
+void update(const float temp, int * restrict read, int * restrict write);
+double calculate(int * restrict read, int * restrict write, int * restrict M_max);
