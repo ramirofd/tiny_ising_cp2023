@@ -1,5 +1,5 @@
 CC=gcc
-SIM_PARAMS=-DL=4096 -DMETRIC -DBLOCK=64
+SIM_PARAMS=-DL=2048 -DMETRIC -DBLOCK=16
 # SIM_PARAMS=-DL=512 -DOUTPUT_SIM_RESULT -DBLOCK=16
 OPTIM_FLAGS=-O2 -march=native -ftree-vectorize -fopt-info-vec -fopt-info-missed-vec -fno-strict-aliasing -fopenmp
 CFLAGS=-std=c11 -Wall -Wextra $(OPTIM_FLAGS) $(SIM_PARAMS)
