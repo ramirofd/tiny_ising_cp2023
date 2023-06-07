@@ -4,6 +4,10 @@
 #define L 384 // linear system size
 #endif
 
+#ifndef BLOCK
+#define BLOCK L
+#endif
+
 #ifndef TEMP_INITIAL
 #define TEMP_INITIAL 0.0 // initial temperature
 #endif

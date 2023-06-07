@@ -138,7 +138,7 @@ int main(void)
     #endif
 
     #if defined(METRIC)
-    printf("%i, %lf\n", L, ((double)N)/elapsed); //puntos de la grilla por segundo
+    printf("%i, %i, %lf\n", BLOCK, L, ((double)N)/elapsed); //puntos de la grilla por segundo
     #endif
 
     #ifdef OUTPUT_SIM_RESULT
@@ -154,6 +154,7 @@ int main(void)
                stat[i].m4);
     }
     #endif
-
+    free(grid_b);
+    free(grid_r);
     return 0;
 }

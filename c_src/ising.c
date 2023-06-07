@@ -1,56 +1,66 @@
 #include "ising.h"
+#include "xor.h"
+#include <omp.h>
 
-// Global state variables for the generators
-static uint64_t s[2] = {0xdeadbeef, 0xcafebabe};
+// // Global state variables for the generators
+// static uint64_t s[2] = {0xdeadbeef, 0xcafebabe};
 
-// Generate a 64-bit pseudorandom number using xorshift128plus
-uint64_t xorshift128plus() {
-    uint64_t s1 = s[0];
-    const uint64_t s0 = s[1];
-    s[0] = s0;
-    s1 ^= s1 << 23;
-    s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
-    return s[1];
-}
+// // Generate a 64-bit pseudorandom number using xorshift128plus
+// uint64_t xorshift128plus() {
+//     uint64_t s1 = s[0];
+//     const uint64_t s0 = s[1];
+//     s[0] = s0;
+//     s1 ^= s1 << 23;
+//     s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+//     return s[1];
+// }
 
 size_t idx(size_t x, size_t y) {
     return y * WIDTH + x;
 }
 
-// void update_cell(const int *restrict read, int * restrict write, int i, int j, int neigh, float expfs[2]){
-            
-// }
+inline void update_cell(const int *restrict read, int * restrict write, int y, int x, int side_shift, float expfs[2]){
+    int spin_old = write[idx(x, y)];
+    int spin_new = -spin_old;
 
-void update_rb(color col, const float temp, const int * restrict read, int * restrict write)
+    // computing h_before
+    int spin_neigh_up   = read[idx(x, (y - 1 + HEIGHT) % HEIGHT)];
+    int spin_neigh_same = read[idx(x, y)];
+    int spin_neigh_side = read[idx((x + side_shift + WIDTH)%WIDTH, y)];
+    int spin_neigh_down = read[idx(x, (y + 1) % HEIGHT)];
+
+    int h_before = - (spin_old*spin_neigh_up)   - (spin_old*spin_neigh_same)
+            - (spin_old*spin_neigh_side) - (spin_old*spin_neigh_down);
+
+    // h after taking new spin
+    int h_after = - (spin_new*spin_neigh_up)   - (spin_new*spin_neigh_same)
+                    - (spin_new*spin_neigh_side) - (spin_new*spin_neigh_down);
+
+    int delta_E = h_after - h_before;
+    int thread_id = omp_get_thread_num();
+    int rand = xorshift128plus(s[thread_id])%RAND_MAX;
+    float p = rand / (float)RAND_MAX;
+    if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
+        write[idx(x,y)] = spin_new;
+    }
+}
+
+void update_rb(color col, const float temp, const int * restrict read, int * restrict write, int li, int ri)
 {
     float expfs[2] = {expf(-(4/temp)), expf(-(8/temp))};
-    int side_shift = col == RED ? -1 : 1;
+    int side_shift;
+    if(col == BLACK && (li%2)) side_shift = 1;
+    else if(col == RED) side_shift = -1;
+    else if(col == BLACK && (li%2)) side_shift = -1;
+    else side_shift =1;
 
-    for (unsigned int y = 1; y < HEIGHT-1; ++y, side_shift = -side_shift) {
+    for (unsigned int y = li; y < ri; ++y) {
+        update_cell(read, write, y, 0, side_shift, expfs);
         for (unsigned int x = 1; x < WIDTH-1; ++x) {
-            int spin_old = write[idx(x, y)];
-			int spin_new = -spin_old;
-
-			// computing h_before
-			int spin_neigh_up   = read[idx(x, (y - 1 + HEIGHT) % HEIGHT)];
-			int spin_neigh_same = read[idx(x, y)];
-			int spin_neigh_side = read[idx((x + side_shift + WIDTH), y)];
-			int spin_neigh_down = read[idx(x, (y + 1) % HEIGHT)];
-
-			int h_before = - (spin_old*spin_neigh_up)   - (spin_old*spin_neigh_same)
-				   - (spin_old*spin_neigh_side) - (spin_old*spin_neigh_down);
-
-			// h after taking new spin
-			int h_after = - (spin_new*spin_neigh_up)   - (spin_new*spin_neigh_same)
-			              - (spin_new*spin_neigh_side) - (spin_new*spin_neigh_down);
-
-			int delta_E = h_after - h_before;
-            int rand = xorshift128plus()%RAND_MAX;
-            float p = rand / (float)RAND_MAX;
-            if (delta_E <= 0 || p <= expfs[delta_E/4-1]) {
-                write[idx(x,y)] = spin_new;
-            }
+            update_cell(read, write, y, x, side_shift, expfs);
         }
+        update_cell(read, write, y, WIDTH-1, side_shift, expfs);
+        side_shift = -side_shift;
     }
 }
 
@@ -78,8 +88,20 @@ int calculate_rb(color col, const int * restrict read, const int * restrict writ
 
 void update(const float temp, int * restrict grid_r, int * restrict grid_b) 
 {
-	update_rb(RED, temp, grid_b, grid_r);
-	update_rb(BLACK, temp, grid_r, grid_b);
+    int block = BLOCK;
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for(int i=0; i<HEIGHT; i+=block){
+            update_rb(RED, temp, grid_b, grid_r, i, i+block);
+        }
+
+        #pragma omp for
+        for(int i=0; i<HEIGHT; i+=block){
+	        update_rb(BLACK, temp, grid_r, grid_b, i, i+block);
+        }
+    }
+	
 }
 
 double calculate(int * restrict grid_r, int * restrict grid_b, int * restrict M_max) {
